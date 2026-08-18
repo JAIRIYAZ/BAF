@@ -1,5 +1,5 @@
 """
-Sentinel — Transaction Risk Console (backend)
+BAF — Transaction Risk Console (backend)
 ==============================================
 Flask API that serves a LightGBM fraud-risk model (trained on a
 self-generated, multi-feature balanced risk label — see

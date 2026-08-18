@@ -1,4 +1,4 @@
-# Sentinel — Transaction Risk Console
+# BAF — Transaction Risk Console
 
 A fraud-risk scoring application for your LightGBM model, with a custom
 Flask API backend and a hand-built frontend (no Streamlit). All original

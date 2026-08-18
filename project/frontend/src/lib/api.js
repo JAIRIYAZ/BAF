@@ -1,5 +1,5 @@
 /**
- * Sentinel — API client
+ * BAF — API client
  * Wraps all Flask backend endpoints.
  */
 

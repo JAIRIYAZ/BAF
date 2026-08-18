@@ -18,7 +18,7 @@ export default function Sidebar({ activeView, onNavigate, config }) {
           <path d="M11 16.2 L14.4 19.6 L21.3 12.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
         <div className="flex flex-col leading-tight">
-          <span className="font-display text-lg font-semibold tracking-[0.2px]">Sentinel</span>
+          <span className="font-display text-lg font-semibold tracking-[0.2px]">BAF</span>
           <span className="text-[10.5px] tracking-[1.4px] uppercase text-text-on-ink-dim mt-0.5">Risk Console</span>
         </div>
       </div>
