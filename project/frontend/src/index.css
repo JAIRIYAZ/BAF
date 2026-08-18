@@ -1,0 +1,222 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Sentinel — Design Tokens via Tailwind v4 @theme
+   ============================================================ */
+
+@theme {
+  /* -- Ink & navy (chrome) -- */
+  --color-ink-900: #0c1526;
+  --color-ink-800: #142238;
+  --color-ink-700: #1c2e48;
+  --color-ink-line: rgba(255, 255, 255, 0.08);
+
+  /* -- Paper canvas (content) -- */
+  --color-paper: #f5f4ef;
+  --color-paper-raised: #ffffff;
+  --color-paper-border: #e4e1d6;
+  --color-paper-border-strong: #d7d3c4;
+
+  /* -- Brass accent (action / brand) -- */
+  --color-brass: #a97c3f;
+  --color-brass-strong: #8f6631;
+  --color-brass-tint: #f3e7d3;
+
+  /* -- Text -- */
+  --color-text-primary: #171f2b;
+  --color-text-secondary: #5c6774;
+  --color-text-muted: #8b93a0;
+  --color-text-on-ink: #eef1f6;
+  --color-text-on-ink-dim: #9fadc0;
+
+  /* -- Semantic risk colors -- */
+  --color-genuine: #1f7a5c;
+  --color-genuine-bg: #e7f2ec;
+  --color-review: #b3781f;
+  --color-review-bg: #faf1de;
+  --color-suspicious: #b23c33;
+  --color-suspicious-bg: #fbe9e7;
+
+  /* -- Accents used in charts -- */
+  --color-genuine-bright: #4fb98c;
+  --color-review-bright: #e0a83f;
+  --color-suspicious-bright: #e0685c;
+
+  /* -- Fonts -- */
+  --font-display: "Source Serif 4", Georgia, serif;
+  --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* -- Radii -- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* -- Shadows -- */
+  --shadow-card: 0 1px 2px rgba(23, 31, 43, 0.04), 0 1px 0 rgba(23, 31, 43, 0.03);
+}
+
+/* ============================================================
+   Global resets & base styles
+   ============================================================ */
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  background: var(--color-paper);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+button, input, select { font-family: inherit; font-size: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--color-brass);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   View transitions
+   ============================================================ */
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.view-enter {
+  animation: fade-in 0.25s ease;
+}
+
+/* ============================================================
+   Gauge SVG styles (can't do purely in Tailwind)
+   ============================================================ */
+
+.gauge-zone { fill: none; stroke-width: 14; stroke-linecap: butt; }
+.gauge-zone-genuine   { stroke: var(--color-genuine);    opacity: 0.85; }
+.gauge-zone-review    { stroke: var(--color-review);     opacity: 0.85; }
+.gauge-zone-suspicious { stroke: var(--color-suspicious); opacity: 0.85; }
+
+.gauge-needle {
+  stroke: var(--color-ink-900);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: 110px 118px;
+}
+
+.gauge-hub { fill: var(--color-ink-900); }
+
+/* ============================================================
+   SHAP bar animations
+   ============================================================ */
+
+.shap-bar {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+  z-index: 1;
+}
+
+.shap-bar.toward-suspicious {
+  background: linear-gradient(90deg, #e0685c, #b23c33);
+}
+
+.shap-bar.toward-genuine {
+  background: linear-gradient(270deg, #4fb98c, #1f7a5c);
+}
+
+/* ============================================================
+   Distribution bar animation
+   ============================================================ */
+
+.dist-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #c49655, #a97c3f);
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ============================================================
+   Data table
+   ============================================================ */
+
+.data-table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-ink-900);
+  color: var(--color-text-on-ink);
+  text-align: left;
+  padding: 9px 12px;
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.data-table tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-paper-border);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.data-table tbody tr {
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.data-table tbody tr:hover {
+  background: #faf9f5;
+  box-shadow: inset 3px 0 0 var(--color-brass);
+}
+
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+/* ============================================================
+   Mono code block
+   ============================================================ */
+
+.mono-block {
+  background: var(--color-ink-900);
+  color: #cfd8e3;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+  margin: 8px 0 0;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .app-shell { grid-template-columns: 1fr !important; }
+  .sidebar-responsive {
+    position: relative !important;
+    height: auto !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 16px 18px !important;
+    gap: 20px !important;
+  }
+  .sidebar-footer-responsive { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
