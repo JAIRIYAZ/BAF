@@ -2,7 +2,8 @@ import React, { useState, useRef } from "react";
 import { uploadCSV, scoreBatch } from "../lib/api";
 
 /**
- * Batch upload view — drag-drop zone, file chip, column mapping.
+ * Batch upload view — drag-drop zone, file chip, column mapping,
+ * with prominent inline error popups for column mismatches & scoring failures.
  */
 export default function BatchUpload({ onResults, onError }) {
   const [uploading, setUploading] = useState(false);
@@ -11,13 +12,17 @@ export default function BatchUpload({ onResults, onError }) {
   const [mapping, setMapping] = useState({});
   const [processing, setProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [inlineError, setInlineError] = useState(null); // { title, details[] }
   const fileRef = useRef(null);
+
+  const clearError = () => setInlineError(null);
 
   const handleFile = async (file) => {
     if (!file) return;
     setUploading(true);
     setFileChipText(`Uploading ${file.name}…`);
     setUploadData(null);
+    clearError();
 
     try {
       const data = await uploadCSV(file);
@@ -26,9 +31,29 @@ export default function BatchUpload({ onResults, onError }) {
 
       // Initialize mapping from server suggestion
       setMapping({ ...data.mapping });
+
+      // Check if any required columns couldn't be auto-matched
+      const requiredFields = Object.entries(data.required_columns)
+        .filter(([, req]) => req)
+        .map(([f]) => f);
+      const unmapped = requiredFields.filter((f) => !data.mapping[f]);
+
+      if (unmapped.length > 0) {
+        setInlineError({
+          title: "Column mismatch detected",
+          details: [
+            `${unmapped.length} required column${unmapped.length > 1 ? "s" : ""} could not be auto-matched from your CSV:`,
+            ...unmapped.map((f) => `• ${f}`),
+            "Please select the correct source column for each from the dropdowns below, or upload a CSV with matching column names.",
+          ],
+        });
+      }
     } catch (err) {
       setFileChipText("");
-      onError(err.message);
+      setInlineError({
+        title: "Upload failed",
+        details: [err.message],
+      });
     } finally {
       setUploading(false);
     }
@@ -44,6 +69,10 @@ export default function BatchUpload({ onResults, onError }) {
 
   const handleMappingChange = (field, value) => {
     setMapping((m) => ({ ...m, [field]: value || null }));
+    // Clear the inline error when user starts fixing mapping
+    if (inlineError?.title === "Column mismatch detected") {
+      clearError();
+    }
   };
 
   // Validation
@@ -57,12 +86,16 @@ export default function BatchUpload({ onResults, onError }) {
 
   const handleProceed = async () => {
     if (!uploadData || !canProceed) return;
+    clearError();
     setProcessing(true);
     try {
       const data = await scoreBatch(uploadData.token, mapping);
       onResults({ ...data, token: uploadData.token });
     } catch (err) {
-      onError(err.message);
+      setInlineError({
+        title: "Scoring failed",
+        details: [err.message],
+      });
     } finally {
       setProcessing(false);
     }
@@ -76,6 +109,57 @@ export default function BatchUpload({ onResults, onError }) {
           Upload a transaction CSV — even with different column names or extra columns your bank system adds. You'll confirm the column mapping before scoring.
         </p>
       </header>
+
+      {/* ── Error Modal Overlay ── */}
+      {inlineError && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          style={{ background: "rgba(12, 21, 38, 0.7)", backdropFilter: "blur(6px)" }}
+          onClick={clearError}
+        >
+          <div
+            className="error-modal-card bg-paper-raised rounded-[20px] shadow-[0_24px_80px_rgba(0,0,0,0.35)] max-w-[480px] w-full p-0 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Red top bar */}
+            <div className="h-[5px] bg-gradient-to-r from-[#e0685c] via-[#b23c33] to-[#e0685c]" />
+
+            <div className="px-8 pt-8 pb-7 text-center">
+              {/* Big warning icon */}
+              <div className="mx-auto w-16 h-16 rounded-full bg-suspicious-bg flex items-center justify-center mb-5 error-icon-pulse">
+                <svg className="w-8 h-8 text-suspicious" viewBox="0 0 32 32" fill="none">
+                  <path d="M16 3L2 29h28L16 3z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+                  <path d="M16 13v7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="16" cy="24" r="1.3" fill="currentColor" />
+                </svg>
+              </div>
+
+              {/* Title */}
+              <h2 className="font-display text-[24px] font-semibold text-text-primary m-0 mb-2">
+                {inlineError.title}
+              </h2>
+
+              {/* Details */}
+              <div className="text-[14.5px] text-text-secondary leading-relaxed mb-6 space-y-1.5">
+                {inlineError.details.map((line, i) => (
+                  <p key={i} className="m-0">{line}</p>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div className="h-px bg-paper-border mb-5" />
+
+              {/* Action button */}
+              <button
+                onClick={clearError}
+                className="w-full bg-brass text-white border-none rounded-[var(--radius-md)] px-6 py-3.5 text-[15px] font-semibold cursor-pointer transition-all duration-200 hover:brightness-[1.08] hover:shadow-[0_6px_20px_rgba(169,124,63,0.3)] active:translate-y-px"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Upload card */}
       <div className="bg-paper-raised border border-paper-border rounded-[var(--radius-lg)] p-6 shadow-[var(--shadow-card)] mb-5">
@@ -147,7 +231,12 @@ export default function BatchUpload({ onResults, onError }) {
                   value={mapping[field] || ""}
                   onChange={(e) => handleMappingChange(field, e.target.value)}
                   className={`border bg-paper rounded-[var(--radius-sm)] px-2.5 py-2 font-body text-[12.5px] cursor-pointer w-full transition-all duration-150 focus:border-brass focus:shadow-[0_0_0_3px_rgba(169,124,63,0.14)] focus:outline-none
-                    ${uploadData.confidence[field] ? "border-genuine" : "border-paper-border-strong"}`}
+                    ${!mapping[field] && required
+                      ? "border-suspicious bg-suspicious-bg"
+                      : uploadData.confidence[field]
+                        ? "border-genuine"
+                        : "border-paper-border-strong"
+                    }`}
                 >
                   <option value="">— not in file —</option>
                   {uploadData.columns.map((col) => (
@@ -173,3 +262,4 @@ export default function BatchUpload({ onResults, onError }) {
     </section>
   );
 }
+

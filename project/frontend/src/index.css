@@ -112,6 +112,28 @@ button, input, select { font-family: inherit; font-size: inherit; color: inherit
 }
 
 /* ============================================================
+   Error modal overlay
+   ============================================================ */
+
+.error-modal-card {
+  animation: modal-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes modal-pop {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.error-icon-pulse {
+  animation: icon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes icon-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(178, 60, 51, 0.15); }
+  50%      { box-shadow: 0 0 0 12px rgba(178, 60, 51, 0); }
+}
+
+/* ============================================================
    View transitions
    ============================================================ */
 
