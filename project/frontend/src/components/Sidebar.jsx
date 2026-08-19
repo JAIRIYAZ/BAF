@@ -26,6 +26,18 @@ export default function Sidebar({ activeView, onNavigate, config }) {
       {/* Nav */}
       <nav className="flex flex-col gap-1">
         <button
+          onClick={() => onNavigate("landing")}
+          className="flex items-center gap-2 bg-transparent border-none text-left px-3 py-2 rounded-[var(--radius-sm)] cursor-pointer transition-all duration-150 text-text-on-ink-dim hover:bg-[rgba(255,255,255,0.05)] hover:text-text-on-ink text-[12.5px] mb-1"
+        >
+          <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span>Back to Home</span>
+        </button>
+
+        <div className="h-px bg-ink-line mb-1" />
+
+        <button
           onClick={() => onNavigate("single")}
           className={`flex items-center gap-2.5 bg-transparent border-none text-left px-3 py-2.5 rounded-[var(--radius-sm)] cursor-pointer transition-all duration-150
             ${activeView === "single"

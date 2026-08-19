@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import LandingPage from "./components/LandingPage";
 import Sidebar from "./components/Sidebar";
 import ScoreTransaction from "./components/ScoreTransaction";
 import BatchUpload from "./components/BatchUpload";
@@ -6,10 +7,10 @@ import BatchResults from "./components/BatchResults";
 import { fetchConfig } from "./lib/api";
 
 /**
- * App — top-level layout with sidebar + views.
+ * App — top-level layout: landing page → sidebar + views.
  */
 export default function App() {
-  const [activeView, setActiveView] = useState("single");
+  const [activeView, setActiveView] = useState("landing");
   const [config, setConfig] = useState(null);
   const [globalError, setGlobalError] = useState("");
   const [batchData, setBatchData] = useState(null);
@@ -22,7 +23,7 @@ export default function App() {
           setGlobalError(cfg.load_error || "Model failed to load.");
         }
       })
-      .catch((err) => {
+      .catch(() => {
         setGlobalError("Could not reach the backend API. Is the Flask server running?");
       });
   }, []);
@@ -30,6 +31,7 @@ export default function App() {
   const handleNavigate = (view) => {
     setActiveView(view);
     setGlobalError("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleError = (msg) => {
@@ -47,11 +49,21 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  /* ---- Landing page (full-screen, no sidebar) ---- */
+  if (activeView === "landing") {
+    return (
+      <div className="landing-transition">
+        <LandingPage onEnter={() => handleNavigate("single")} />
+      </div>
+    );
+  }
+
+  /* ---- Dashboard (sidebar + content) ---- */
   return (
-    <div className="app-shell grid min-h-screen" style={{ gridTemplateColumns: "232px 1fr" }}>
+    <div className="app-shell grid min-h-screen dashboard-transition" style={{ gridTemplateColumns: "232px 1fr" }}>
       <Sidebar activeView={activeView} onNavigate={handleNavigate} config={config} />
 
-      <main className="px-10 py-8 max-w-[1120px] max-[900px]:px-4 max-[900px]:py-5">
+      <main className="dashboard-main px-10 py-8 max-[900px]:px-4 max-[900px]:py-5">
         {/* Global error banner */}
         {globalError && (
           <div className="bg-suspicious-bg text-suspicious p-3 rounded-[var(--radius-sm)] text-[13px] mb-4 leading-relaxed">

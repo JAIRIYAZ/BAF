@@ -94,7 +94,7 @@ export default function ScoreTransaction({ config, onError }) {
         </p>
       </header>
 
-      <div className="grid gap-5 items-start" style={{ gridTemplateColumns: "minmax(320px, 400px) 1fr" }}>
+      <div className="grid gap-6 items-start" style={{ gridTemplateColumns: "minmax(320px, 440px) 1fr" }}>
         {/* Form card */}
         <div className="bg-paper-raised border border-paper-border rounded-[var(--radius-lg)] p-6 shadow-[var(--shadow-card)]">
           <h2 className="font-display text-[17px] font-semibold m-0 mb-1">Transaction details</h2>
