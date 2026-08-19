@@ -1,0 +1,36 @@
+name: Deploy BAF to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+
+          script: |
+            cd /home/ubuntu/BAF
+
+            echo "Pulling latest code..."
+            git pull origin main
+
+            echo "Activating virtual environment..."
+            source /home/ubuntu/BAF/project/venv/bin/activate
+
+            echo "Installing dependencies..."
+            pip install -r /home/ubuntu/BAF/project/requirements.txt
+
+            echo "Restarting Sentinel..."
+            sudo systemctl restart sentinel
+
+            echo "Checking Sentinel..."
+            sudo systemctl is-active sentinel
